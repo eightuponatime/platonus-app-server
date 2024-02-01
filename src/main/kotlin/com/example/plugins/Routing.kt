@@ -1,16 +1,30 @@
 package com.example.plugins
 
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import java.net.http.HttpResponse
+
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.util.*
+import io.ktor.util.Identity.decode
+import kotlinx.coroutines.*
+import kotlinx.serialization.json.Json
 
 
 fun Application.configureRouting() {
     routing {
-        get("/") {
-            call.respondText("Hello World!")
-        }
+
 
         post("/login") {
             try {
@@ -98,6 +112,7 @@ fun Application.configureRouting() {
             }
         }
 
+
         post("/getGroup") {
             try {
                 val username = call.receive<Username>()
@@ -107,5 +122,59 @@ fun Application.configureRouting() {
                 call.respond("")
             }
         }
+
+        val json = Json {
+            isLenient = true
+            ignoreUnknownKeys = true
+        }
+
+        val client = HttpClient(CIO) {
+            install(ContentNegotiation) {
+                json(json)
+            }
+            install(HttpTimeout) {
+                requestTimeoutMillis = 120000
+            }
+
+        }
+
+
+
+
+        get("/") {
+            val response: HelloResponse = withContext(Dispatchers.IO) {
+                val responser = client.get("http://localhost:3000/hello")
+                val kek = responser.body<String>()
+                json.decodeFromString(kek)
+            }
+            call.respond(HttpStatusCode.OK, response.message)
+        }
+
+
+        post("/parse-schedule") {
+            try {
+                val user = call.receive<User>()
+                println("Sending request with user: $user")
+
+                runBlocking {
+                    val response = client.post("http://localhost:3000/parse") {
+                        contentType(ContentType.Application.Json)
+                        setBody(user)
+                        timeout {
+                            connectTimeoutMillis = 120_000
+                            socketTimeoutMillis = 120_000 }
+                    }
+                    //delay(120_000)
+                    val result = response.body<String>()
+                    println("Received response: $result")
+
+                    call.respond(result)
+                }
+            } catch (e: Exception) {
+                println("Exception caught: ${e.message}")
+                call.respond(HttpStatusCode.InternalServerError)
+            }
+        }
+
     }
 }

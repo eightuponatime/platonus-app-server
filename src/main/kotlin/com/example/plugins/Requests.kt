@@ -7,6 +7,8 @@ data class User(
     val username: String,
     val password: String
 )
+@Serializable
+data class HelloResponse(val message: String)
 
 @Serializable
 data class Student(

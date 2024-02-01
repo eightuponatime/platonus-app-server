@@ -8,6 +8,7 @@ import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.websocket.*
 import kotlinx.serialization.json.Json
+import java.net.http.HttpClient
 import java.time.Duration
 
 fun main() {

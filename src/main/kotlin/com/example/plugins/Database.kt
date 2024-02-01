@@ -32,7 +32,10 @@ fun logInDatabase(user: User): Boolean {
         while (resultSet.next()) {
             val storedPassword = resultSet.getString("password")
 
-            if(storedPassword == user.password) {
+            /*if(storedPassword == user.password) {
+                return true
+            }*/
+            if(BCrypt.checkpw(user.password, storedPassword)) {
                 return true
             }
         }
@@ -260,7 +263,7 @@ fun insertInDatabase(student: Student) {
     val url = StringBuilder()
         .append("jdbc:sqlserver://localhost:1433;")
         .append("databaseName=platonus_database;")
-        .append("user=eightuponatime")
+        .append("user=eightuponatime;")
         .append("password=1234")
         .toString()
 
@@ -305,7 +308,7 @@ fun getAllUsersFromDatabase(): List<Student> {
     val url = StringBuilder()
         .append("jdbc:sqlserver://localhost:1433;")
         .append("databaseName=platonus_database;")
-        .append("user=eightuponatime")
+        .append("user=eightuponatime;")
         .append("password=1234")
         .toString()
 

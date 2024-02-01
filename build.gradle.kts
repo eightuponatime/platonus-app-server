@@ -26,6 +26,8 @@ repositories {
 }
 
 dependencies {
+
+    implementation("io.ktor:ktor-client-content-negotiation:$ktor_version")
     //password hash
     implementation("org.mindrot:jbcrypt:0.4")
 
@@ -52,6 +54,7 @@ dependencies {
     implementation("io.ktor:ktor-client-core")
     implementation("io.ktor:ktor-client-cio")
     implementation("io.ktor:ktor-client-logging")
+    implementation("io.ktor:ktor-client-json:2.3.3")
 
     implementation("io.ktor:ktor-server-content-negotiation-jvm:2.2.4")
     implementation("io.ktor:ktor-server-netty:2.2.4")
