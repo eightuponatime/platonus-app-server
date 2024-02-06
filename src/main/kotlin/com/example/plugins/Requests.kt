@@ -7,8 +7,27 @@ data class User(
     val username: String,
     val password: String
 )
+
+@Serializable
+data class UpdateUsername(
+    val username: String,
+    val newUsername: String
+)
+
 @Serializable
 data class HelloResponse(val message: String)
+
+@Serializable
+data class Schedule(
+    val username: String,
+    val schedule: String
+)
+
+@Serializable
+data class Plan(
+    val username: String,
+    val plan: String
+)
 
 @Serializable
 data class Student(

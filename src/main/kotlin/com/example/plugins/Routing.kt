@@ -40,6 +40,20 @@ fun Application.configureRouting() {
             }
         }
 
+        post("/changeUsername") {
+            try {
+                val user = call.receive<UpdateUsername>()
+                val isUpdated = updateUsername(user)
+                if(isUpdated) {
+                    call.respond(true)
+                } else {
+                    call.respond(false)
+                }
+            } catch(e: Exception) {
+                call.respond(false)
+            }
+        }
+
         post("/changePassword") {
             try {
                 val user = call.receive<User>()
@@ -92,6 +106,26 @@ fun Application.configureRouting() {
             }
         }
 
+        post("/getPlan") {
+            try {
+                val username = call.receive<Username>()
+                val plan = selectPlan(username)
+                call.respond(plan)
+            } catch(e: Exception) {
+                call.respond("")
+            }
+        }
+
+        post("/getSchedule") {
+            try {
+                val username = call.receive<Username>()
+                val schedule = selectSchedule(username)
+                call.respond(schedule)
+            } catch(e: Exception) {
+                call.respond("")
+            }
+        }
+
         post("/getLastName") {
             try {
                 val username = call.receive<Username>()
@@ -138,9 +172,6 @@ fun Application.configureRouting() {
 
         }
 
-
-
-
         get("/") {
             val response: HelloResponse = withContext(Dispatchers.IO) {
                 val responser = client.get("http://localhost:3000/hello")
@@ -173,6 +204,51 @@ fun Application.configureRouting() {
             } catch (e: Exception) {
                 println("Exception caught: ${e.message}")
                 call.respond(HttpStatusCode.InternalServerError)
+            }
+        }
+
+        post("/parse-plan") {
+            try {
+                val user = call.receive<User>()
+                println("Sending request with user: $user")
+
+                runBlocking {
+                    val response = client.post("http://localhost:3000/parse-plan") {
+                        contentType(ContentType.Application.Json)
+                        setBody(user)
+                        timeout {
+                            connectTimeoutMillis = 120_000
+                            socketTimeoutMillis = 120_000
+                        }
+                    }
+                    val result = response.body<String>()
+                    println("Received response: $result")
+
+                    call.respond(result)
+                }
+            } catch(e: Exception) {
+                println("Exception caught: ${e.message}")
+                call.respond(HttpStatusCode.InternalServerError)
+            }
+        }
+
+        post("/insertSchedule" ) {
+            try {
+                val schedule = call.receive<Schedule>()
+                insertScheduleInDatabase(schedule)
+                call.respond(true)
+            } catch(e: Exception) {
+                call.respond(false)
+            }
+        }
+
+        post("/insertPlan") {
+            try {
+                val plan = call.receive<Plan>()
+                insertPlanInDatabase(plan)
+                call.respond(true)
+            } catch(e: Exception) {
+                call.respond(false)
             }
         }
 
